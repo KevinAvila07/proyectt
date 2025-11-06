@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="estilos.css">
+<title>Control del pañol - Primero</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<header>
+  <div class="logo-container">
+    <img src="imagenespract/logo.jpeg" alt="Logo" class="logo">
+    <h2>Control del Pañol prueba</h2>
+  </div>
+</header>
+<div class="app">
+  <nav>
+    <a class="active" onclick="showView('dashboard')">Inicio</a>
+    <a onclick="showView('inventario')">Inventario</a>
+    <a onclick="showView('prestamos')">Préstamos</a>
+    <a onclick="showView('devoluciones')">Herramientas Devueltas</a>
+    <a onclick="showView('nodevuelto')">Herramientas No Devueltas</a>
+    <a onclick="showView('roto')">Herramientas Desaparecidas/Rotas</a>
+  </nav>
+  
+  <main>
+    <!-- Dashboard -->
+    <div id="dashboard">
+      <div class="card">
+        <h3>Resumen</h3>
+        <p><strong>Herramientas prestadas:</strong><span id="prestadasCount"></span></p>
+        <p><strong>Stock disponible:</strong><span id="stockCount"></span></p>
+        <div class="alert" id="alertaPendientes"></div>
+    </div>
+
+      <!-- Buscador -->
+      <div class="search-bar">
+        <input type="text" id="buscarHerramienta" placeholder="Buscar herramienta">
+        <select id="filtroCategoria">
+         <option value="">Categorías</option>
+         <option value="Hardware">Hardware</option>
+         <option value="Electrónica">Electrónica</option>         
+         <option value="carpintería">Carpintería</option>
+         <option value="Protección">Protección</option>
+        </select>
+      </div>
+
+      <!-- Tarjetas de herramientas -->
+      <div class="tools-container" id="listaHerramientas"></div>
+    </div>
+
+    <!-- Préstamos -->
+    <div id="prestamos" class="hidden">
+      <div class="card">
+
+        <h3>Registrar nuevo préstamo</h3>
+        <form id="formPrestamo">
+          
+         <div class="herramienta-wrapper" style="position: relative;">
+           <input type="text" id="herramientaInput" placeholder="Nombre de Herramienta">
+           <div id="sugerenciasHerramientas" class="sugerencias"></div>
+         </div>
+          <input type="number" id="cantidad" placeholder="Cantidad" min="1" required>
+        
+        
+
+        <div class="usuario-wrapper" style="position: relative;">
+          <input type="text" id="profesor" placeholder="Profesor" required>
+        </div>
+
+          <select id="curso" required>
+            <option value="">Curso</option>
+            <option value="1ro">1ro</option>
+            <option value="2do">2do</option>
+            <option value="3ro">3ro</option>
+            <option value="4to">4to</option>
+            <option value="5to">5to</option>
+            <option value="6to">6to</option>
+            <option value="7mo">7mo</option>
+          </select>
+          <select id="division" required>
+            <option value="">División</option>
+            <option value="1ra">1ra</option>
+            <option value="2da">2da</option>
+            <option value="3ra">3ra</option>
+            <option value="4ta">4ta</option>
+          </select>
+          <select id="turno" required>
+            <option value="">Turno</option>
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Vespertino">Vespertino</option>
+          </select>
+          <button type="submit">Agregar préstamo</button>
+        </form>
+      </div>
+
+      <div class="search-bar">
+       <input type="text" id="buscarPrestamo" placeholder="Buscar préstamo por nombre, profesor, curso, turno o fecha...">
+      </div>
+
+      <div class="card">
+        <h3>Préstamos Registrados</h3>
+          <table id="tablaPrestamos" class="tabla-estilo">
+        </table>
+      </div>
+    </div>
+
+<div class="modal" id="modalPrestamo">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalPrestamo()">&times;</span>
+    <h3>Modificar Préstamo</h3>
+    <form id="formModificarPrestamo">
+      <input type="hidden" id="modId">
+      
+        <label>Cantidad prestada: <span id="modCantidadTotal"></span></label>
+      <div class="form-group">  
+        <label>Cantidad devuelta:</label> 
+        <input type="number" id="modCantidadDevuelta" min="0">
+      </div>  
+
+    <div class="form-group">  
+      <label>Estado:</label>
+      <select id="modEstado">
+        <option value="Pendiente">Pendiente</option>
+        <option value="Parcial">Parcial</option>
+        <option value="Devuelto">Devuelto</option>
+        <option value="No Devuelto">No Devuelto</option>
+      </select>
+    </div>  
+
+      <button type="submit">Guardar cambios</button>
+    </form>
+  </div>
+</div>
+
+
+<!-- Inventario -->
+<div id="inventario" class="hidden">
+  <div class="card">
+    <h3>Agregar Nueva Herramienta</h3>
+    <form id="formAgregar" action="api/registrar_herramienta.php" method="POST">
+      <input type="text" id="nombre" placeholder="Nombre de herramienta" required>
+      <select id="catHerramienta">
+        <option value="" disabled selected>Categoría</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Electrónica">Electrónica</option>
+        <option value="Carpintería">Carpintería</option>
+        <option value="Protección">Protección</option>
+      </select>
+
+      <input type="text" id="marca" placeholder="Marca" required>
+      <input type="text" id="modelo" placeholder="Modelo" required>
+
+      <input type="text" id="descripcion" placeholder="Descripcion" required>
+      <input type="number" id="stock" placeholder="Stock inicial" min="1" required>
+
+            <!-- Nuevo input para imagen -->
+      <div class="file-upload">
+      <label for="imagen" class="btn-subir">Subir Imagen</label>       
+      <input type="file" id="imagen" accept="image/*">
+      <span id="nombreArchivo">Ningún archivo seleccionado</span>
+      </div>
+
+
+      <button type="submit">Agregar Herramienta</button>
+    </form>
+  </div>
+
+  <div class="search-bar">
+  <input type="text" id="buscarInventario" placeholder="Buscar herramienta en inventario...">
+  <select id="filtroInventarioCategoria">
+    <option value="">Categorías</option>
+    <option value="Hardware">Hardware</option>
+    <option value="Electrónica">Electrónica</option>
+    <option value="Carpintería">Carpintería</option>
+    <option value="Protección">Protección</option>
+  </select>
+  </div>
+
+<div class="card">
+  <h3>Tabla de Herramientas</h3>
+  <table class="tabla-estilo">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Categoría</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Descripción</th>
+        <th>Stock</th>
+        <th>Cantidad Afectada</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="herramientasTableBody"></tbody>
+  </table>
+</div>
+</div>
+
+
+<!-- Modal para editar herramienta -->
+<div class="modal" id="modalEditar">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModalEditar()">&times;</span>
+    <h3>Editar Herramienta</h3>
+    <form id="formEditar">
+      <input type="hidden" id="editId">
+
+      <!-- Campos para editar -->
+      <div class="form-group">
+        <label>Nombre:</label> 
+        <input type="text" id="editNombre" required>
+      </div>
+
+      <div class="form-group">
+        <label>Categoría:</label> 
+        <select id="editCategoria" required>
+          <option value="Carpintería">Carpintería</option>
+          <option value="Electrónica">Electrónica</option>
+          <option value="Protección">Protección</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Marca:</label>
+        <input type="text" id="editMarca" required>
+      </div>
+
+      <div class="form-group">
+        <label>Modelo:</label>
+        <input type="text" id="editModelo" required>
+      </div>
+
+      <div class="form-group">  
+        <label>Descripción:</label>
+        <input type="text" id="editDescripcion" required>
+      </div>
+
+      <div class="form-group">
+        <label>Stock:</label> 
+        <input type="number" id="editStock" min="1" required>
+      </div>       
+
+      <div class="form-group">
+      <label for="editEstadoHerramienta">Estado:</label>
+        <select id="editEstadoHerramienta">
+        <option value="Normal">Normal</option>
+        <option value="Desaparecida">Desaparecida</option>
+        <option value="No-Funciona">No funciona</option>
+      </select>
+      </div>
+
+      <div class="form-group hidden" id="grupoCantidadRota">
+        <label id="labelCantidadRota">Cantidad afectada:</label>
+        <input type="number" id="editCantidadRota" min="1" value="1">
+      </div>
+
+
+      <button type="submit">Guardar Cambios</button>
+    </form>
+  </div>
+</div>
+
+
+<div id="modalResolverDeuda" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="cerrarModalResolverDeuda()">&times;</span> 
+        <h3>Resolver Deuda Pendiente</h3>
+        
+        <form id="formResolverDeuda">
+            
+            <p>Préstamo ID: <b id="deudaIdPrestamo"></b></p>
+            <p>Herramienta: <b id="deudaNombreHerramienta"></b></p>
+            <p>Profesor: <b id="deudaProfesor"></b></p>
+            <p>Cantidad pendiente (Deuda): <b id="deudaCantidadPendiente"></b></p>
+
+            <input type="hidden" id="deudaIdNodevuelto">
+            <input type="hidden" id="deudaIdPrestamoHidden">
+            <input type="hidden" id="deudaIdHerramientaHidden">
+            
+            <label for="deudaCantidadRecuperada">Cantidad devuelta o recuperada:</label>
+            <input type="number" id="deudaCantidadRecuperada" min="0" required>
+            
+            <div class="modal-actions">
+                <button type="submit" class="btn-rojo">Resolver Deuda</button>
+            </div>
+            
+            <p class="nota">
+                <b>Ingrese 0 si la herramienta se da por perdida o fue reemplazada sin devolución física.</b>
+            </p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Detalles -->
+<div class="modal" id="modalDetalles">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal()">&times;</span>
+    <h3 id="detalleNombre"></h3>
+    <img id="detalleImg" style="width:100%; aspect-ratio: 1/1; object-fit:cover; border-radius:6px;">
+    <p><strong>Categoría:</strong> <span id="detalleCategoria"></span></p>
+    <p><strong>Marca:</strong> <span id="detalleMarca"></span></p>
+    <p><strong>Modelo:</strong> <span id="detalleModelo"></span></p>
+    <p><strong>Stock:</strong> <span id="detalleStock"></span></p>
+    <p><strong>Descripción:</strong> <span id="detalleDesc"></span></p>
+  </div>
+</div>
+
+<!-- DEVOLUCIONES -->
+<div id="devoluciones" class="hidden card">
+  <div class="card">
+    <h3>Herramientas Devueltas</h3>
+    <div id="contenidoDevoluciones">
+      <p><b>Cargando devoluciones...</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- HERRAMIENTAS NO DEVUELTAS -->
+<div id="nodevuelto" class="hidden card">
+  <div class="card">
+    <h3>Herramientas No Devueltas</h3>
+    <div id="contenidoNoDevuelto">
+      <p><b>No hay herramientas no devueltas.</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- HERRAMIENTAS ROTAS o desaparecidas -->
+<div id="roto" class="hidden card">
+  <div class="card">
+    <h3>Herramientas Desaparecidas o Que No Funcionan </h3>
+    <div id="contenidoRoto">
+      <p><b>No hay herramientas desaparecidas o rotas registradas.</b></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/herramientas.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/prestamos.js"></script>
+<script src="js/sugerencias.js"></script>
+<script src="js/busquedas.js"></script>
+</script>
+
+</body>
+</html>
